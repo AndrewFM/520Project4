@@ -29,8 +29,7 @@ public class ValueIteration {
      */
     public ValueIteration(Mdp mdp, double discount) {
     	utility = computeUtilityFunction(mdp, discount, null);
-    	
-    	//TODO: Compute Policy from utilities.    	
+    	policy = computePolicyFromUtilities(mdp, utility);	
     }
     
     /**
@@ -90,6 +89,37 @@ public class ValueIteration {
     	}
     	
     	return utilityNew;
+    }
+    
+    /**
+     * Construct an optimal policy by choosing actions for each state that
+     * maximize the expected utility of the successor state.
+     * 
+     * @param mdp The MDP being worked on.
+     * @param utilities The utilities of each state.
+     * @return An optimal policy based on these utilities.
+     */
+    public static int[] computePolicyFromUtilities(Mdp mdp, double[] utilities) {
+    	int[] returnPolicy = new int[mdp.numStates];
+    	
+    	for(int i=0; i<mdp.numStates; i++) {
+    		double maxUtility = Double.MIN_VALUE;
+    		
+    		//Find the action that results in the highest utility.
+    		for(int j=0; j<mdp.numActions; j++) {
+    			double actionUtility = 0;
+    			for(int k=0; k<mdp.nextState[i][j].length; k++)
+    				actionUtility += mdp.transProb[i][j][k]*utilities[mdp.nextState[i][j][k]];
+    			
+    			//If best so far, assign this action as the current argmax.
+    			if (actionUtility > maxUtility) {
+    				maxUtility = actionUtility;
+    				returnPolicy[i] = j;
+    			}
+    		}
+    	}
+    	
+    	return returnPolicy;
     }
 
 }

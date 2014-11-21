@@ -20,10 +20,32 @@ public class PolicyIteration {
      * for the given <tt>mdp</tt> with given <tt>discount</tt> factor,
      * and stores the answer in <tt>policy</tt>.
      */
-    public PolicyIteration(Mdp mdp, double discount) {
-
-	// TODO: Compute policy from utilities.
-
+    public PolicyIteration(Mdp mdp, double discount) {    	
+	    //Generate a random initial policy.
+	    policy = new int[mdp.numStates];
+	    for(int i=0; i<policy.length; i++) 
+	    	policy[i] = (int)Math.floor(Math.random()*mdp.numActions);
+	    	
+		//Iterate the policy until it stabilizes.
+	    boolean utilityChanged = true;
+	    PolicyEvaluation peCurrent;
+	    PolicyEvaluation peNew = new PolicyEvaluation(mdp, discount, policy);
+	    
+	    while (utilityChanged != false) {
+	    	//Policy Improvement:
+	    	peCurrent = peNew;
+	    	policy = ValueIteration.computePolicyFromUtilities(mdp, peCurrent.utility);
+	    	peNew = new PolicyEvaluation(mdp, discount, policy);
+	    	
+	    	//Check if the new policy actually changed any of the utilities.
+	    	utilityChanged = false;
+	    	for(int i=0; i<mdp.numStates; i++) {
+	    		if (Math.abs(peCurrent.utility[i]-peNew.utility[i]) != 0) {
+	    			utilityChanged = true;
+	    			break;
+	    		}
+	    	}	    	
+	    }
     }
 
 }
