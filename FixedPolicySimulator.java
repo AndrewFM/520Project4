@@ -34,6 +34,9 @@ public class FixedPolicySimulator implements MdpSimulator {
 	}
 	cur_state = mdp.nextState[s][a][j];
 
+	rewardDebug += mdp.reward[s];
+	System.out.println("Rewards so far: "+rewardDebug);
+	
 	return s;
     }
 
@@ -44,5 +47,6 @@ public class FixedPolicySimulator implements MdpSimulator {
     private int[] policy;
     private int cur_state;
     private Random rand = new Random();
+    private double rewardDebug = 0;
 }
 

@@ -74,7 +74,7 @@ public class RunHPMdp {
 
 	// animate cat chasing mouse
 	RestaurantAnimator animator = new RestaurantAnimator(mdp);
-	MdpSimulator simulator = new FixedPolicySimulator(mdp, ppi.policy);
+	MdpSimulator simulator = new FixedPolicySimulator(mdp, vpi.policy);
 	animator.animateGuiOnly(simulator);
 
     return;

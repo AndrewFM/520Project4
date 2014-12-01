@@ -56,18 +56,27 @@ public class GenerateMDP_Restaurant {
 								else{
 									table3.setXY(0, 0);
 								}
+								
+								boolean dirtyTableAvailable = false;
+								if (table1.x != 0 || table2.x != 0 || table3.x != 0)
+									dirtyTableAvailable = true;
+								
 								if((worker.equals(table1) || worker.equals(table2) || worker.equals(table3)) && worker.equals(manager)){
-									reward = 20;
+									reward = 50;
 								}
 								else if((worker.equals(table1) || worker.equals(table2) || worker.equals(table3))){
 									reward = 10;
 								}
 								else if(worker.equals(manager)){
-									reward = -10;
+									if (dirtyTableAvailable)
+										reward = -10;
+									else
+										reward = 0;
 								}
-								else{
+								else if (dirtyTableAvailable)
+									reward = -2;
+								else
 									reward = 0;
-								}
 								
 								state = worker.toString()+":"+manager.toString()+":"+table1.toString()+":"+table2.toString()+":"+table3.toString();
 								state =state.replaceAll("0", "");
@@ -118,15 +127,15 @@ public class GenerateMDP_Restaurant {
 								state = worker.toString()+":"+manager.toString()+":"+table1.toString()+":"+table2.toString()+":"+table3.toString();
 								state = state.replaceAll("0", "");
 								actionStates = calculateStates(worker, manager, table1, table2, table3, 'N');
-								pw.write(state + " N "+actionStates+"\n");
+								pw.write(state + "  N  "+actionStates+"\n");
 								actionStates = calculateStates(worker, manager, table1, table2, table3, 'S');
-								pw.write(state + " S "+actionStates+"\n");
+								pw.write(state + "  S  "+actionStates+"\n");
 								actionStates = calculateStates(worker, manager, table1, table2, table3, 'E');
-								pw.write(state + " E "+actionStates+"\n");
+								pw.write(state + "  E  "+actionStates+"\n");
 								actionStates = calculateStates(worker, manager, table1, table2, table3, 'W');
-								pw.write(state + " W "+actionStates+"\n");
+								pw.write(state + "  W  "+actionStates+"\n");
 								actionStates = calculateStates(worker, manager, table1, table2, table3, 'O');
-								pw.write(state + " O "+actionStates+"\n");
+								pw.write(state + "  O  "+actionStates+"\n");
 
 							}
 							
@@ -207,142 +216,79 @@ public class GenerateMDP_Restaurant {
 			
 			managerDup.setXY(manager);
 			
-			if(!managerDup.canGoAlongDirection(moveAlong, num_blocks_x, num_blocks_y)){
-				probability_multiplier += 1;
-				continue;
-			}
-			//Add probabilites of other states where movement was not possible to state where manager stays
-			if(moveAlong.equals(rest)){
-				prob1 = prob1 * probability_multiplier;
-				prob2 = prob2 * probability_multiplier;
-				prob3 = prob3 * probability_multiplier;
-				prob4 = prob4 * probability_multiplier;
-				prob5 = prob5 * probability_multiplier;
-				prob6 = prob6 * probability_multiplier;
-				prob7 = prob7 * probability_multiplier;
-				prob8 = prob8 * probability_multiplier;
-				prob9 = prob9 * probability_multiplier;
-				prob10 = prob10 * probability_multiplier;
-			}
+			if(managerDup.canGoAlongDirection(moveAlong, num_blocks_x, num_blocks_y))
+				managerDup.goAlongDirection(moveAlong);
 		
-			
-			managerDup.goAlongDirection(moveAlong);
 			//tables - check if workerDup moved to any dirty table
 			
 			//All 3 tables are dirty: Then there's 5 outcomes, each with probability 20%, for each of the moves the manager can make.
 			if(table1.x != 0 && table2.x != 0 && table3.x != 0){
-				
-				if(!workerDup.equals(table1)){
-					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString();
-				}
-				else{
-					state = workerDup.toString()+":"+managerDup.toString()+"::";
-				}
-				
-				if(!workerDup.equals(table2)){
-					state = state + ":"+table2.toString();
-				}
-				else{
-					state = state + "::";
-				}
-				
-				if(!workerDup.equals(table3)){
-					state = state + ":"+table3.toString()+" ";
-				}
-				else{
-					state = state + ":: ";
-				}
+				if(worker.equals(table1))
+					state = workerDup.toString()+":"+managerDup.toString()+":::"+table2.toString()+":"+table3.toString()+" ";
+				else if (worker.equals(table2))
+					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString()+":::"+table3.toString()+" ";	
+				else if (worker.equals(table3))
+					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString()+":"+table2.toString()+":: ";
+				else
+					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString()+":"+table2.toString()+":"+table3.toString()+" ";
 				
 				//adding along with probability
-				states = states + state + prob1 + " ";
+				states += state + prob1 + " ";
 			}
 			//Two tables are dirty, one of them are clean: Then there's 10 outcomes, 5 of which are for the table becoming dirty & the managerDup moving (2% each), and 5 of which are for the table staying clean & the managerDup moving (18% each).
 			//two tables are dirty(1 and 2) - 3 changes
 			else if(table1.x != 0 && table2.x != 0){
+				if(worker.equals(table1))
+					state = workerDup.toString()+":"+managerDup.toString()+":::"+table2.toString();
+				else if (worker.equals(table2))
+					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString()+"::";
+				else
+					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString()+":"+table2.toString();
 				
-				if(!workerDup.equals(table1)){
-					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString();
-				}
-				else{
-					state = workerDup.toString()+":"+managerDup.toString()+"::";
-				}
-				
-				if(!workerDup.equals(table2)){
-					state = state + ":"+table2.toString();
-				}
-				else{
-					state = state + "::";
-				}
-				
-				states = states + state+":x " + prob2 + " ";
-				states = states + state+":y " + prob3 + " ";
-				
-				states = states.replaceAll("x", ":");
-				states = states.replaceAll("y", "5:2");
+				states += state+":: " + prob2 + " " + state + ":5:2 " + prob3 + " ";
 			}
 			//two tables are dirty(1 and 3) - 2 changes
 			else if(table1.x != 0 && table3.x != 0){
-				
-				if(!workerDup.equals(table1)){
+				if(!worker.equals(table1))
 					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString();
-				}
-				else{
+				else
 					state = workerDup.toString()+":"+managerDup.toString()+"::";
-				}
 				
-				state = state + ":x";
+				state += ":x";
 				
-				if(!workerDup.equals(table3)){
-					state = state + ":"+table3.toString()+" ";
-				}
-				else{
-					state = state + ":: ";
-				}
+				if(!worker.equals(table3))
+					state += ":"+table3.toString()+" ";
+				else
+					state += ":: ";
 				
-				states = states + state + prob2 +" ";
-				states = states + state.replaceAll("x", "y") + prob3 +" ";
-				
+				states += state + prob2 + " " + state.replaceAll("x", "y") + prob3 + " ";
 				states = states.replaceAll("x", ":");
 				states = states.replaceAll("y", "5:4");
 			}
 			//two tables are dirty(2 and 3) - 1 changes
-			else if(table1.x != 0 && table3.x != 0){
-				
+			else if(table2.x != 0 && table3.x != 0){
 				state = workerDup.toString()+":"+managerDup.toString()+":x";
 				
-				if(!workerDup.equals(table2)){
-					state = state + ":"+table2.toString();
-				}
-				else{
-					state = state + "::";
-				}				
+				if(worker.equals(table2))
+					state += ":::"+table3.toString()+" ";
+				else if (worker.equals(table3))
+					state += ":"+table2.toString()+":: ";
+				else
+					state += ":"+table2.toString()+":"+table3.toString()+" ";
 				
-				if(!workerDup.equals(table3)){
-					state = state + ":"+table3.toString()+" ";
-				}
-				else{
-					state = state + ":: ";
-				}
-				
-				states = states + state + prob2 + " ";
-				states = states + state.replaceAll("x", "y") + prob3 + " ";
-				
+				states += state + prob2 + " " + state.replaceAll("x", "y") + prob3 + " ";				
 				states = states.replaceAll("x", ":");
 				states = states.replaceAll("y", "1:3");
 			}
 			//One tables is dirty, the other two are clean: Then there's 20 outcomes. 5 for both staying clean (16.2%), 5 for both becoming dirty (0.2%), and 10 for one of the two becoming dirty (1.8%).
 			//one table is dirty(1)
-			else if(table1.x != 0){
-				
-				if(!workerDup.equals(table1)){
+			else if (table1.x != 0) {
+				if(!worker.equals(table1))
 					state = workerDup.toString()+":"+managerDup.toString()+":"+table1.toString();
-				}
-				else{
+				else
 					state = workerDup.toString()+":"+managerDup.toString()+"::";
-				}
 				
-				state = state + ":a";
-				state = state + ":x ";
+				state += ":a:x ";
 				
 				states = states + state + prob4 + " " + state.replaceAll("a","b") + prob5 + " " + state.replaceAll("x", "y") + prob6 + " " + state.replaceAll("b", "a") + prob5 + " ";
 				states = states.replaceAll("a", ":");
@@ -351,38 +297,32 @@ public class GenerateMDP_Restaurant {
 				states = states.replaceAll("y", "5:2");
 			}
 			//one table is dirty(2)
-			else if(table2.x != 0){
-				
+			else if (table2.x != 0) {
 				state = workerDup.toString()+":"+managerDup.toString()+":a";
 				
-				if(!workerDup.equals(table2)){
-					state = state + ":"+table2.toString();
-				}
-				else{
-					state = state + "::";
-				}		
+				if(!worker.equals(table2))
+					state += ":"+table2.toString();
+				else
+					state += "::";	
 				
-				state = state + ":x ";
+				state += ":x ";
 				
-				states = states + state + prob4 + " " + state.replaceAll("a","b") + prob5 + " " + state.replaceAll("x", "y") + prob6 + " " + state.replaceAll("b", "a") + prob5 + " ";
+				states += state + prob4 + " " + state.replaceAll("a","b") + prob5 + " " + state.replaceAll("x", "y") + prob6 + " " + state.replaceAll("b", "a") + prob5 + " ";
 				states = states.replaceAll("a", ":");
 				states = states.replaceAll("b", "1:3");
 				states = states.replaceAll("x", ":");
 				states = states.replaceAll("y", "5:2");
 			}
 			//one table is dirty(3)
-			else if(table3.x != 0){
-				
+			else if (table3.x != 0) {
 				state = workerDup.toString()+":"+managerDup.toString()+":a:x";
 				
-				if(!workerDup.equals(table3)){
-					state = state + ":"+table3.toString()+" ";
-				}
-				else{
-					state = state + ":: ";
-				}		
+				if(!worker.equals(table3))
+					state += ":"+table3.toString()+" ";
+				else
+					state += ":: ";	
 				
-				states = states + state + prob4 + " " + state.replaceAll("a","b") + prob5 + " " + state.replaceAll("x", "y") + prob6 + " " + state.replaceAll("b", "a") + prob5 + " ";
+				states += state + prob4 + " " + state.replaceAll("a","b") + prob5 + " " + state.replaceAll("x", "y") + prob6 + " " + state.replaceAll("b", "a") + prob5 + " ";
 				states = states.replaceAll("a", ":");
 				states = states.replaceAll("b", "1:3");
 				states = states.replaceAll("x", ":");
@@ -390,21 +330,19 @@ public class GenerateMDP_Restaurant {
 			}
 			//All 3 tables are clean: Then there's 40 outcomes. 5 for all staying clean (%14.58), 15 for one of the three becoming dirty (%1.62), 15 for two of the three becoming dirty (%0.18), and 5 for all becoming dirty (%0.02).
 			//all 3 are clean
-			else{
+			else {
 				state = workerDup.toString()+":"+managerDup.toString()+":a:m:x ";
 				
-				states = states + state + prob7 + " " + state.replaceAll("x","y") + prob8 + " " + state.replaceAll("m","n") + prob9 + " " + state.replaceAll("y", "x") + prob8 + " " + state.replaceAll("a", "b") + prob9 + " " + state.replaceAll("n", "m") + prob8 + " " + state.replaceAll("x", "y") + prob9 + " " + state.replaceAll("m", "n") + String.format("%.4f",prob10) + " ";
+				states += state + prob7 + " " + state.replaceAll("x","y") + prob8 + " " + state.replaceAll("m","n") + prob9 + " " + state.replaceAll("y", "x") + prob8 + " " + state.replaceAll("a", "b") + prob9 + " " + state.replaceAll("n", "m") + prob8 + " " + state.replaceAll("x", "y") + prob9 + " " + state.replaceAll("m", "n") + String.format("%.4f",prob10) + " ";
 				states = states.replaceAll("a", ":");
 				states = states.replaceAll("b", "1:3");
 				states = states.replaceAll("m", ":");
 				states = states.replaceAll("n", "5:4");
 				states = states.replaceAll("x", ":");
-				states = states.replaceAll("y", "5:2 ");
-				break;
+				states = states.replaceAll("y", "5:2");
 			}
 			
 		}
-	
 		
 		return states;
 	}
