@@ -57,7 +57,7 @@ public class ValueIteration {
     	while (delta > EPSILON) {
     		delta = 0;
     		for(int i=0; i<utilityCurrent.length; i++) {
-    			double maxAction = 0;
+    			double maxAction = -Double.MAX_VALUE;
     			double actionUtility = 0;
     			
     			//If no policy specified, calculate the maximum expected utility out of every available action at this state.
@@ -103,7 +103,7 @@ public class ValueIteration {
     	int[] returnPolicy = new int[mdp.numStates];
     	
     	for(int i=0; i<mdp.numStates; i++) {
-    		double maxUtility = Double.MIN_VALUE;
+    		double maxUtility = -Double.MAX_VALUE;
     		
     		//Find the action that results in the highest utility.
     		for(int j=0; j<mdp.numActions; j++) {
